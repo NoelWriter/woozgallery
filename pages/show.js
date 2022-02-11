@@ -92,8 +92,8 @@ const Show = () => {
                 <ReactPlayer
                     url={url}
                     playing={true}
-                    width={"1900px"}
-                    height={"1080"}
+                    width={"1366px"}
+                    height={"768px"}
                     controls={true}
                     onEnded={doRotatePls}
                 />
