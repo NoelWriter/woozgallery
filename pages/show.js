@@ -36,7 +36,7 @@ const Show = () => {
     const [image, setImage] = useState("")
     const [doRotate, setDoRotate] = useState(true)
 
-    const _DELAY = 2000
+    const _DELAY = 10000
 
     const importAll = (r) => {
         return r.keys().map(r);
