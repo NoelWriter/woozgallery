@@ -1,5 +1,17 @@
 import {useEffect, useLayoutEffect, useState} from "react";
 import React from 'react';
+import ReactPlayer from 'react-player'
+
+const useOnceCall = (cb, condition = true) => {
+    const isCalledRef = React.useRef(false);
+
+    React.useEffect(() => {
+        if (condition && !isCalledRef.current) {
+            isCalledRef.current = true;
+            cb();
+        }
+    }, [cb, condition]);
+};
 
 const useInterval = (callback, delay) => {
     const savedCallback = React.useRef();
@@ -22,8 +34,9 @@ const useInterval = (callback, delay) => {
 const Show = () => {
     const [images, setImages] = useState()
     const [image, setImage] = useState("")
+    const [doRotate, setDoRotate] = useState(true)
 
-    const _DELAY = 10000
+    const _DELAY = 2000
 
     const importAll = (r) => {
         return r.keys().map(r);
@@ -35,9 +48,84 @@ const Show = () => {
         setImages(files)
     };
 
-    useLayoutEffect(() => {
+    useOnceCall(() => {
         fetchImages()
-    }, [])
+    })
+
+    const getExtension = filename => {
+        let parts = filename.split('.');
+        return parts[parts.length - 1];
+    };
+
+    const isVideo = filename => {
+        let ext = getExtension(filename);
+        switch (ext.toLowerCase()) {
+            case 'm4v':
+            case 'avi':
+            case 'mpg':
+            case 'mp4':
+                return true;
+        }
+        return false;
+    };
+
+    const doRotatePls = () => {
+      setDoRotate(true)
+    }
+
+    useEffect(() => {
+        if (!image)
+            return
+
+        if (isVideo(image))
+            setDoRotate(false)
+        else
+            setDoRotate(true)
+    }, [image])
+
+    const getDisplayComponent = (url) => {
+        if (!url)
+            return ""
+
+        if (isVideo(url)) {
+            return (<div className={"center-fit"}>
+                <ReactPlayer
+                    url={url}
+                    playing={true}
+                    width={"1900px"}
+                    height={"1080"}
+                    controls={true}
+                    onEnded={doRotatePls}
+                />
+                <style jsx>
+                    {`
+                        .center-fit {
+                            overflow: hidden;
+                            width: 100%;
+                            max-width: 100%;
+                            max-height: 98vh;
+                            margin: auto;
+                        }
+                    `}
+                </style>
+            </div>)
+        }
+        else
+            return (<>
+                <img src={image} className={"center-fit"} alt=""/>
+                <style jsx>
+                    {`
+                        .center-fit {
+                            overflow: hidden;
+                            width: 100%;
+                            max-width: 100%;
+                            max-height: 98vh;
+                            margin: auto;
+                        }
+                    `}
+                </style>
+            </>)
+    }
 
     const getRandomImage = () => {
         if (!images)
@@ -48,15 +136,19 @@ const Show = () => {
         if (!randomElement)
             return ""
 
-        setImage(randomElement.default.src)
+        console.log(randomElement)
+
+        setImage(randomElement)
     }
 
     useInterval(() => {
         fetchImages()
-    }, 100000)
+    }, 1000000)
 
     useInterval(() => {
-        getRandomImage()
+        console.log("go to next slide: ", doRotate)
+        if (doRotate)
+            getRandomImage()
     }, _DELAY)
 
     useEffect(() => {
@@ -65,7 +157,7 @@ const Show = () => {
 
     return (<>
         <div className="imgbox">
-            <img src={image} className={"center-fit"} alt=""/>
+            {getDisplayComponent(image)}
         </div>
 
         <style jsx>{`
