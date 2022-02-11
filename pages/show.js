@@ -143,7 +143,7 @@ const Show = () => {
 
     useInterval(() => {
         fetchImages()
-    }, 1000000)
+    }, 240000)
 
     useInterval(() => {
         console.log("go to next slide: ", doRotate)
